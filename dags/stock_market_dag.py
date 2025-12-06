@@ -1,30 +1,27 @@
 from datetime import datetime, timedelta
-
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-
-from fetch_stock_data import fetch_and_store_stock
+from fetch_crypto_data import fetch_and_store_crypto
 
 default_args = {
     "owner": "airflow",
-    "depends_on_past": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=1),
+    "retries": 3,
+    "retry_delay": timedelta(minutes=2),
 }
 
 with DAG(
-    dag_id="stock_market_hourly_pipeline",
+    dag_id="crypto_price_hourly_pipeline",
     default_args=default_args,
-    description="Minimal stock market pipeline (placeholder logic)",
-    schedule_interval="0 * * * *",  # runs every hour
+    description="Fetch and store BTC price into PostgreSQL",
+    schedule_interval="0 * * * *",
     start_date=datetime(2024, 1, 1),
     catchup=False,
-    tags=["stocks", "minimal"],
+    tags=["crypto", "postgres", "api"],
 ) as dag:
 
-    fetch_and_store_task = PythonOperator(
-        task_id="fetch_and_store_stock_task",
-        python_callable=fetch_and_store_stock,
+    fetch_task = PythonOperator(
+        task_id="fetch_and_store_crypto_task",
+        python_callable=fetch_and_store_crypto,
     )
 
-    fetch_and_store_task
+    fetch_task
